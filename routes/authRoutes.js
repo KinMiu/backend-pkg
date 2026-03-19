@@ -14,6 +14,7 @@ const {
   rejectResetRequest,
   loginAdmin,
   changeAdminPassword,
+  changeAdminUsername,
 } = require('../controllers/authController');
 
 router.post('/dosen/login', loginDosen);
@@ -23,6 +24,7 @@ router.post('/operator/change-password', changeOperatorPassword);
 router.post('/operator/reset-password', resetOperatorPassword);
 router.post('/admin/login', loginAdmin);
 router.post('/admin/change-password', changeAdminPassword);
+router.post('/admin/change-username', changeAdminUsername);
 router.post('/reset-password', resetPassword);
 router.post('/request-reset-password', requestResetPassword);
 router.get('/reset-requests', listResetRequests);

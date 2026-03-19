@@ -9,11 +9,13 @@ const DEFAULT_ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin123';
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '12345678';
 
 async function ensureAdminUser() {
+  // Jika sudah ada admin user di database (hasil perubahan username admin, dst),
+  // jangan buat admin default lagi supaya username tidak "balik".
+  const anyAdmin = await AdminUser.findOne({});
+  if (anyAdmin) return anyAdmin;
+
   const username = String(DEFAULT_ADMIN_USERNAME || '').trim();
   if (!username) return null;
-
-  const existing = await AdminUser.findOne({ username });
-  if (existing) return existing;
 
   const salt = await bcrypt.genSalt(10);
   const passwordHash = await bcrypt.hash(String(DEFAULT_ADMIN_PASSWORD), salt);
@@ -542,6 +544,54 @@ exports.changeAdminPassword = async (req, res, next) => {
     await AdminUser.updateOne({ _id: row._id }, { $set: { passwordHash } });
 
     return res.status(200).json({ success: true, data: { username: row.username } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Change admin username (by username + current password)
+// @route   POST /api/auth/admin/change-username
+// @access  Public
+exports.changeAdminUsername = async (req, res, next) => {
+  try {
+    const { username, currentPassword, newUsername } = req.body || {};
+
+    if (!username || !currentPassword || !newUsername) {
+      return res
+        .status(400)
+        .json({ success: false, error: 'username, currentPassword, newUsername are required' });
+    }
+
+    const uname = String(username).trim();
+    const nextUname = String(newUsername).trim();
+    if (!nextUname) {
+      return res.status(400).json({ success: false, error: 'newUsername is required' });
+    }
+
+    await ensureAdminUser();
+
+    const row = await AdminUser.findOne({ username: uname });
+    if (!row) {
+      return res.status(404).json({ success: false, error: 'Admin not found' });
+    }
+
+    const ok = await bcrypt.compare(String(currentPassword), row.passwordHash);
+    if (!ok) {
+      return res.status(401).json({ success: false, error: 'Current password is incorrect' });
+    }
+
+    if (nextUname === uname) {
+      return res.status(400).json({ success: false, error: 'newUsername must be different' });
+    }
+
+    const existing = await AdminUser.findOne({ username: nextUname });
+    if (existing) {
+      return res.status(409).json({ success: false, error: 'Username already taken' });
+    }
+
+    await AdminUser.updateOne({ _id: row._id }, { $set: { username: nextUname } });
+
+    return res.status(200).json({ success: true, data: { username: nextUname } });
   } catch (error) {
     next(error);
   }
