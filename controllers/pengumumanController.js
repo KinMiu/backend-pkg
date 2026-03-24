@@ -34,7 +34,9 @@ exports.getPengumumanById = async (req, res, next) => {
 
 exports.createPengumuman = async (req, res, next) => {
   try {
-    let data = req.body;
+    const data = { ...(req.body || {}) };
+    delete data._id;
+    delete data.id;
     if (req.file) {
       const relativePath = path
         .relative(
@@ -63,7 +65,9 @@ exports.updatePengumuman = async (req, res, next) => {
         error: 'Pengumuman not found',
       });
     }
-    let updateData = req.body;
+    const updateData = { ...(req.body || {}) };
+    delete updateData._id;
+    delete updateData.id;
     if (req.file) {
       const relativePath = path
         .relative(

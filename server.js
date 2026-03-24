@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
+const multer = require('multer');
 const connectDB = require('./config/db');
 
 // Load env vars
@@ -57,7 +58,20 @@ app.get('/', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      success: false,
+      error: err.message || 'Upload error',
+    });
+  }
+  if (err && err.message && err.message.includes('Invalid file type')) {
+    return res.status(400).json({
+      success: false,
+      error: err.message,
+    });
+  }
+  const statusCode = err.statusCode || err.status || 500;
+  res.status(statusCode).json({
     success: false,
     error: err.message || 'Server Error'
   });
