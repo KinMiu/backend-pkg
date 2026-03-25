@@ -20,6 +20,9 @@ const resolveUploadSubfolder = (req, file) => {
   // K3SP event images
   if (baseUrl.includes('/api/k3sp-events')) return 'k3sp-event';
 
+  // Pengumuman images
+  if (baseUrl.includes('/api/pengumuman')) return 'pengumuman';
+
   // Partner logos
   if (baseUrl.includes('/api/partners')) return 'partner';
 

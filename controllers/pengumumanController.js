@@ -37,15 +37,17 @@ exports.createPengumuman = async (req, res, next) => {
     const data = { ...(req.body || {}) };
     delete data._id;
     delete data.id;
-    if (req.file) {
-      const relativePath = path
-        .relative(
-          path.join(__dirname, '../public/uploads'),
-          req.file.path
-        )
-        .replace(/\\/g, '/');
-      data.foto = relativePath;
+
+    if (Array.isArray(req.files) && req.files.length > 0) {
+      const relativePaths = req.files.map((f) =>
+        path
+          .relative(path.join(__dirname, '../public/uploads'), f.path)
+          .replace(/\\/g, '/')
+      );
+      data.fotos = relativePaths;
+      data.foto = relativePaths[0] || data.foto || '';
     }
+
     const newItem = await Pengumuman.create(data);
     res.status(201).json({
       success: true,
@@ -68,15 +70,17 @@ exports.updatePengumuman = async (req, res, next) => {
     const updateData = { ...(req.body || {}) };
     delete updateData._id;
     delete updateData.id;
-    if (req.file) {
-      const relativePath = path
-        .relative(
-          path.join(__dirname, '../public/uploads'),
-          req.file.path
-        )
-        .replace(/\\/g, '/');
-      updateData.foto = relativePath;
+
+    if (Array.isArray(req.files) && req.files.length > 0) {
+      const relativePaths = req.files.map((f) =>
+        path
+          .relative(path.join(__dirname, '../public/uploads'), f.path)
+          .replace(/\\/g, '/')
+      );
+      updateData.fotos = relativePaths;
+      updateData.foto = relativePaths[0] || updateData.foto || '';
     }
+
     const updated = await Pengumuman.findByIdAndUpdate(req.params.id, updateData);
     res.status(200).json({
       success: true,

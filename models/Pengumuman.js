@@ -8,6 +8,7 @@ const pengumumanSchema = new mongoose.Schema(
     lokasi: { type: String, default: '' },
     jenis: { type: String, required: true },
     foto: { type: String, default: '' },
+    fotos: { type: [String], default: [] },
     satminkal: { type: String, default: '' },
   },
   { timestamps: true }

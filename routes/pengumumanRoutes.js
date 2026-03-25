@@ -12,12 +12,12 @@ const upload = require('../middleware/uploadMiddleware');
 router
   .route('/')
   .get(getPengumuman)
-  .post(upload.single('foto'), createPengumuman);
+  .post(upload.array('foto', 30), createPengumuman);
 
 router
   .route('/:id')
   .get(getPengumumanById)
-  .put(upload.single('foto'), updatePengumuman)
+  .put(upload.array('foto', 30), updatePengumuman)
   .delete(deletePengumuman);
 
 module.exports = router;
